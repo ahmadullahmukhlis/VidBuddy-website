@@ -1,6 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const isActive = (href) => pathname === href;
+  const linkClass = (href) =>
+    `font-medium transition ${
+      isActive(href) ? "text-[#FF6B00]" : "text-gray-700 hover:text-[#FF6B00]"
+    }`;
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
@@ -18,22 +28,22 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden lg:flex items-center space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-[#FF6B00] font-medium transition">
+            <Link href="/" className={linkClass("/")}>
               Home
             </Link>
-            <Link href="/features" className="text-gray-700 hover:text-[#FF6B00] font-medium transition">
+            <Link href="/features" className={linkClass("/features")}>
               Features
             </Link>
-            <Link href="/how-it-works" className="text-gray-700 hover:text-[#FF6B00] font-medium transition">
+            <Link href="/how-it-works" className={linkClass("/how-it-works")}>
               How It Works
             </Link>
-            <Link href="/supported-sites" className="text-gray-700 hover:text-[#FF6B00] font-medium transition">
+            <Link href="/supported-sites" className={linkClass("/supported-sites")}>
               Supported Sites
             </Link>
-            <Link href="/premium" className="text-gray-700 hover:text-[#FF6B00] font-medium transition">
+            <Link href="/premium" className={linkClass("/premium")}>
               Premium
             </Link>
-            <Link href="/faq" className="text-gray-700 hover:text-[#FF6B00] font-medium transition">
+            <Link href="/faq" className={linkClass("/faq")}>
               FAQ
             </Link>
           </div>
