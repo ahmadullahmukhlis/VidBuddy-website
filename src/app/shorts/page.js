@@ -155,21 +155,23 @@ export default function ShortsPage() {
                     </div>
                   )}
 
+                  {video.url ? (
+                    <button
+                      type="button"
+                      aria-label="Download video"
+                      onClick={() => handleDownload(video.url)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center"
+                      style={{ background: "#FF6B00" }}
+                    >
+                      <i className="fas fa-download"></i>
+                    </button>
+                  ) : null}
+
                   <div className="absolute inset-x-0 bottom-6 px-5 flex items-center justify-between text-white">
                     <div className="max-w-[70%]">
                       <p className="text-sm font-semibold line-clamp-2">{video.title}</p>
                       {video.views ? <p className="text-xs text-gray-300 mt-1">{video.views} views</p> : null}
                     </div>
-                    {video.url ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDownload(video.url)}
-                        className="px-4 py-2 rounded-full text-sm font-semibold shadow-lg"
-                        style={{ background: "#FF6B00" }}
-                      >
-                        Download
-                      </button>
-                    ) : null}
                   </div>
                 </div>
               </div>

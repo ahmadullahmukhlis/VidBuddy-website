@@ -34,7 +34,7 @@ export default function DiscoverPage() {
     setError("");
     setVideos([]);
     try {
-      if (tab.type === "trending") {
+      if (tab.type == "trending") {
         const data = await getTrendingVideos();
         setVideos(data || []);
       } else {
