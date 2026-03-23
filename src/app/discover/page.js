@@ -32,6 +32,7 @@ export default function DiscoverPage() {
   const loadTab = useCallback(async (tab) => {
     setIsLoading(true);
     setError("");
+    setVideos([]);
     try {
       if (tab.type === "trending") {
         const data = await getTrendingVideos();
@@ -52,6 +53,7 @@ export default function DiscoverPage() {
     if (!searchQuery.trim()) return;
     setIsLoading(true);
     setError("");
+    setVideos([]);
     try {
       const data = await searchVideos(searchQuery.trim());
       setVideos(data || []);
@@ -130,6 +132,22 @@ export default function DiscoverPage() {
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {isLoading && videos.length === 0
+                ? Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={`skeleton-${index}`}
+                      className="bg-white rounded-2xl shadow-lg border animate-pulse"
+                      style={{ borderColor: "#FFE4D6" }}
+                    >
+                      <div className="w-full h-48 rounded-t-2xl bg-gray-200" />
+                      <div className="p-4 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div className="h-3 bg-gray-200 rounded w-1/3" />
+                        <div className="h-8 bg-gray-200 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))
+                : null}
               {videos.map((video) => (
                 <div
                   key={video.id || video.url}

@@ -31,6 +31,15 @@ export const getTrendingVideos = async () => {
   return await parseJsonResponse(response);
 };
 
+export const getShorts = async (page = 1, perPage = 5) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    per_page: String(perPage),
+  });
+  const response = await fetch(`${API_BASE}/shorts?${params.toString()}`);
+  return await parseJsonResponse(response);
+};
+
 /**
  * Get download links for any social media URL (YouTube, TikTok, etc.)
  */

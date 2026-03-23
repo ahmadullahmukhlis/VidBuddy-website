@@ -1,115 +1,189 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { searchVideos } from "@/app/api/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { buildDownloadUrl, getShorts } from "@/app/api/api";
 import Navbar from "@/components/sections/Navbar";
 import TopAlertBar from "@/components/sections/TopAlertBar";
 import Footer from "@/components/sections/Footer";
 
+const PER_PAGE = 5;
+const SKELETON_COUNT = 6;
+
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const match =
+    url.match(/[?&]v=([^&#]+)/) ||
+    url.match(/youtu\.be\/([^?&#]+)/) ||
+    url.match(/youtube\.com\/shorts\/([^?&#]+)/);
+  return match ? match[1] : null;
+};
+
 export default function ShortsPage() {
-  const [query, setQuery] = useState("shorts");
   const [videos, setVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const cacheRef = useRef(new Map());
+  const sentinelRef = useRef(null);
+  const itemRefs = useRef([]);
 
-  const loadShorts = useCallback(async (searchTerm) => {
+  const loadShorts = useCallback(async (pageToLoad) => {
     setIsLoading(true);
     setError("");
     try {
-      const data = await searchVideos(searchTerm);
-      setVideos(data || []);
+      if (cacheRef.current.has(pageToLoad)) {
+        const cached = cacheRef.current.get(pageToLoad);
+        setVideos((prev) => [...prev, ...cached.items]);
+        setHasMore(cached.hasMore);
+        return;
+      }
+
+      const data = await getShorts(pageToLoad, PER_PAGE);
+      const items = data?.items || [];
+      const more = Boolean(data?.has_more);
+
+      cacheRef.current.set(pageToLoad, { items, hasMore: more });
+      setVideos((prev) => [...prev, ...items]);
+      setHasMore(more);
     } catch (err) {
       setError(err?.message || "Failed to load shorts");
-      setVideos([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  const handleDownload = (videoUrl) => {
+    const downloadUrl = buildDownloadUrl(videoUrl);
+    if (!downloadUrl) return;
+    window.location.href = downloadUrl;
+  };
+
+  const skeletons = useMemo(() => Array.from({ length: SKELETON_COUNT }), []);
+
   useEffect(() => {
-    loadShorts(query);
-  }, [loadShorts, query]);
+    loadShorts(1);
+  }, [loadShorts]);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry.isIntersecting || isLoading || !hasMore) return;
+        const nextPage = page + 1;
+        setPage(nextPage);
+        loadShorts(nextPage);
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, loadShorts, page]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.dataset.index || 0);
+            setActiveIndex(index);
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+
+    itemRefs.current.forEach((node) => {
+      if (node) observer.observe(node);
+    });
+
+    return () => observer.disconnect();
+  }, [videos]);
 
   return (
     <main>
       <TopAlertBar />
       <Navbar />
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col gap-6">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Shorts</h1>
-              <p className="text-gray-600 mt-2">Quick videos, easy downloads.</p>
-            </div>
+      <section className="bg-black">
+        <div className="h-screen overflow-y-scroll snap-y snap-mandatory">
+          {error ? (
+            <div className="h-screen flex items-center justify-center text-red-400">{error}</div>
+          ) : null}
 
-            <div
-              className="bg-white p-2 rounded-2xl shadow-xl flex flex-col sm:flex-row max-w-3xl primary-border"
-              style={{ border: "2px solid #FF6B00" }}
-            >
-              <input
-                type="text"
-                placeholder="Search shorts..."
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    loadShorts(query);
-                  }
+          {videos.map((video, index) => {
+            const videoId = getYouTubeId(video.url);
+            const isActive = index === activeIndex;
+            const src = videoId
+              ? `https://www.youtube.com/embed/${videoId}?autoplay=${isActive ? 1 : 0}&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=1`
+              : null;
+
+            return (
+              <div
+                key={video.id || video.url}
+                ref={(node) => {
+                  itemRefs.current[index] = node;
                 }}
-                className="flex-1 px-4 py-4 text-gray-800 outline-none rounded-xl sm:rounded-none sm:rounded-l-xl"
-              />
-              <button
-                type="button"
-                onClick={() => loadShorts(query)}
-                className="px-8 py-4 text-white font-semibold rounded-xl sm:rounded-none sm:rounded-r-xl transition hover:opacity-90"
-                style={{ background: "#FF6B00" }}
+                data-index={index}
+                className="h-screen snap-start flex items-center justify-center"
               >
-                Search
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Showing: {query}</p>
-              {isLoading ? <p className="text-sm text-gray-500">Loading...</p> : null}
-            </div>
-
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {videos.map((video) => (
-                <div
-                  key={video.id || video.url}
-                  className="bg-white rounded-2xl shadow-lg border"
-                  style={{ borderColor: "#FFE4D6" }}
-                >
-                  {video.thumbnail ? (
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title || "Video"}
-                      className="w-full h-48 object-cover rounded-t-2xl"
+                <div className="relative w-full h-full max-w-md mx-auto">
+                  {src ? (
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={src}
+                      title={video.title || "Shorts Video"}
+                      allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
                     />
-                  ) : null}
-                  <div className="p-4">
-                    <p className="font-semibold text-gray-900 line-clamp-2">{video.title}</p>
-                    {video.views ? <p className="text-sm text-gray-500 mt-1">{video.views} views</p> : null}
-                    <div className="mt-4 flex gap-3">
-                      {video.url ? (
-                        <Link
-                          href={`/download?url=${encodeURIComponent(video.url)}`}
-                          className="px-4 py-2 text-white rounded-xl text-sm font-semibold"
-                          style={{ background: "#FF6B00" }}
-                        >
-                          Get Formats
-                        </Link>
-                      ) : null}
+                  ) : (
+                    <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-gray-300">
+                      No preview
+                    </div>
+                  )}
+
+                  <div className="absolute inset-x-0 bottom-6 px-5 flex items-center justify-between text-white">
+                    <div className="max-w-[70%]">
+                      <p className="text-sm font-semibold line-clamp-2">{video.title}</p>
+                      {video.views ? <p className="text-xs text-gray-300 mt-1">{video.views} views</p> : null}
+                    </div>
+                    {video.url ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(video.url)}
+                        className="px-4 py-2 rounded-full text-sm font-semibold shadow-lg"
+                        style={{ background: "#FF6B00" }}
+                      >
+                        Download
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {isLoading && videos.length === 0
+            ? skeletons.map((_, index) => (
+                <div
+                  key={`skeleton-${index}`}
+                  className="h-screen snap-start flex items-center justify-center"
+                >
+                  <div className="relative w-full h-full max-w-md mx-auto animate-pulse">
+                    <div className="absolute inset-0 bg-gray-900" />
+                    <div className="absolute inset-x-0 bottom-6 px-5 space-y-2">
+                      <div className="h-4 bg-gray-700 rounded w-3/4" />
+                      <div className="h-3 bg-gray-700 rounded w-1/3" />
+                      <div className="h-9 bg-gray-700 rounded-full w-32" />
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              ))
+            : null}
+
+          <div ref={sentinelRef} className="h-1" />
         </div>
       </section>
       <Footer />
