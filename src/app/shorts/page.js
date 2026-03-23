@@ -133,7 +133,7 @@ export default function ShortsPage() {
 
             return (
               <div
-                key={video.id || video.url}
+                key={`${video.id || video.url || 'video'}-${index}`}
                 ref={(node) => {
                   itemRefs.current[index] = node;
                 }}

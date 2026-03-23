@@ -87,6 +87,22 @@ export default function DiscoverPage() {
     loadTab(activeTab);
   }, [activeTab, loadTab]);
 
+  const handleOpenPlaylist = async (playlist) => {
+    if (!playlist?.id) return;
+    setIsLoading(true);
+    setError("");
+    setActivePlaylist(playlist);
+    setPlaylistVideos([]);
+    try {
+      const data = await getPlaylistVideos(playlist.id);
+      setPlaylistVideos(data || []);
+    } catch (err) {
+      setError(err?.message || "Failed to load playlist videos");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getYouTubeId = (url) => {
     if (!url) return null;
     const match =
@@ -193,8 +209,16 @@ export default function DiscoverPage() {
                 {playlistResults.map((playlist) => (
                   <div
                     key={playlist.id}
-                    className="bg-white rounded-2xl shadow-lg border"
+                    className="bg-white rounded-2xl shadow-lg border cursor-pointer transition hover:shadow-xl"
                     style={{ borderColor: "#FFE4D6" }}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleOpenPlaylist(playlist)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        handleOpenPlaylist(playlist);
+                      }
+                    }}
                   >
                     {playlist.thumbnail ? (
                       <img
@@ -208,16 +232,7 @@ export default function DiscoverPage() {
                       {playlist.video_count ? (
                         <p className="text-sm text-gray-500 mt-1">{playlist.video_count} videos</p>
                       ) : null}
-                      <div className="mt-4 flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenPlaylist(playlist)}
-                          className="px-4 py-2 text-white rounded-xl text-sm font-semibold"
-                          style={{ background: "#FF6B00" }}
-                        >
-                          Open Playlist
-                        </button>
-                      </div>
+                      <p className="text-sm text-gray-500 mt-4">Click to open playlist</p>
                     </div>
                   </div>
                 ))}
@@ -382,18 +397,3 @@ export default function DiscoverPage() {
     </main>
   );
 }
-  const handleOpenPlaylist = async (playlist) => {
-    if (!playlist?.id) return;
-    setIsLoading(true);
-    setError("");
-    setActivePlaylist(playlist);
-    setPlaylistVideos([]);
-    try {
-      const data = await getPlaylistVideos(playlist.id);
-      setPlaylistVideos(data || []);
-    } catch (err) {
-      setError(err?.message || "Failed to load playlist videos");
-    } finally {
-      setIsLoading(false);
-    }
-  };
