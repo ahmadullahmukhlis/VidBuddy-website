@@ -70,16 +70,23 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-lg mb-4">Follow Us</h4>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
+              <a href="https://www.facebook.com/nasarimukhlis" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
                 <i className="fab fa-facebook-f"></i>
               </a>
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
+              <a href="https://x.com/ahmadullahmukhi" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
                 <i className="fab fa-twitter"></i>
               </a>
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
+              <a href="https://www.instagram.com/nasarimukhlis" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
                 <i className="fab fa-instagram"></i>
               </a>
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
+              <a href="https://www.linkedin.com/in/ahmadullahmukhlis" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
+                <i className="fab fa-linkedin"></i>
+              </a>
+              <a href="mailto:ahmadullahmukhlis2025@gmail.com" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition" aria-label="Email">
+                <i className="fas fa-envelope"></i>
+              </a>
+              
+              <a href="https://www.youtube.com/channel/UCtO4W3H2vjA1Q9z8T5Yd4rQ" className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#FF6B00] transition">
                 <i className="fab fa-youtube"></i>
               </a>
             </div>
