@@ -28,6 +28,7 @@ export default function ShortsPage() {
   const cacheRef = useRef(new Map());
   const sentinelRef = useRef(null);
   const itemRefs = useRef([]);
+  const lastRequestedPage = useRef(1);
 
   const loadShorts = useCallback(async (pageToLoad) => {
     setIsLoading(true);
@@ -82,6 +83,16 @@ export default function ShortsPage() {
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [hasMore, isLoading, loadShorts, page]);
+
+  useEffect(() => {
+    if (!hasMore || isLoading) return;
+    if (activeIndex < videos.length - 2) return;
+    const nextPage = page + 1;
+    if (lastRequestedPage.current >= nextPage) return;
+    lastRequestedPage.current = nextPage;
+    setPage(nextPage);
+    loadShorts(nextPage);
+  }, [activeIndex, hasMore, isLoading, loadShorts, page, videos.length]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
