@@ -40,12 +40,7 @@ export default function PlatformsSection() {
         </div>
 
         <div className="text-center mt-8">
-          <button
-            className="px-6 py-3 border-2 rounded-xl font-semibold transition hover:bg-[#FF6B00] hover:text-white"
-            style={{ borderColor: "#FF6B00", color: "#FF6B00" }}
-          >
-            View All Supported Sites <i className="fas fa-arrow-right ml-2"></i>
-          </button>
+  
         </div>
       </div>
     </section>
