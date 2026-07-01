@@ -16,7 +16,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-1.5">
-            <img src="/logo.png" alt="VidBuddy Logo" className="h-8 w-auto object-contain" />
+            <img src="./public/logo.png" alt="VidBuddy Logo" className="h-8 w-auto object-contain" />
             <span className="text-2xl font-bold text-gray-800">
               Vid<span style={{ color: "#FF6B00" }}>Buddy</span>
             </span>

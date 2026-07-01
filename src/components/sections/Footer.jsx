@@ -6,7 +6,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 rounded-xl" >
-                      <img src="/logo.png" alt="VidBuddy Logo" className="h-8 w-auto object-contain" />
+                      <img src="./public/logo.png" alt="VidBuddy Logo" className="h-8 w-auto object-contain" />
               </div>
               <span className="text-2xl font-bold">
                 Vid<span style={{ color: "#FF6B00" }}>Buddy</span>
